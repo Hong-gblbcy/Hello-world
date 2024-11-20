@@ -28,7 +28,7 @@ fold_id = 0
 
   
 class Classifier(pl.LightningModule):  
-    def __init__(self, num_classes: int, model_type: str = 'mlp'):  
+    def __init__(self, num_classes: int, model_type: str = 'resnet18'):  
         super().__init__()  
         self.model_type = model_type  
         if model_type == 'resnet18':  
@@ -55,7 +55,10 @@ class Classifier(pl.LightningModule):
   
     def forward(self, x):
         if self.model_type == 'resnet18':
-            x = x.unsqueeze(1).repeat(1, 3, 1, 1)  # Convert to 3-channel image
+            if x.dim() == 3:  # If the input is (batch_size, 28, 28)
+                x = x.unsqueeze(1)  # Add a channel dimension to make it (batch_size, 1, 28, 28)
+            x = x.repeat(1, 3, 1, 1)  # Convert to 3-channel image
+            # x = x.unsqueeze(1).repeat(1, 3, 1, 1)  # Convert to 3-channel image
         else:
             x = x.view(x.size(0), -1)  # Flatten for MLP
         return self.model(x.float())
@@ -76,11 +79,11 @@ class Classifier(pl.LightningModule):
         self.accuracy.update(y_hat, y)  
   
     def on_validation_end(self):  
-        conf_matrix = self.conf_mat.compute()  
-        print(conf_matrix)  
-        plt.figure()  
-        seaborn.heatmap(conf_matrix.cpu(), annot=True)  
-        plt.savefig(f'conf_mat_{fold_id}.png')  
+        # conf_matrix = self.conf_mat.compute()  
+        # print(conf_matrix)  
+        # plt.figure()  
+        # seaborn.heatmap(conf_matrix.cpu(), annot=True)  
+        # plt.savefig(f'conf_mat_{fold_id}.png')  
         accuracy_computed = self.accuracy.compute()  
         print(f'Fold Accuracy={accuracy_computed}')  
   
