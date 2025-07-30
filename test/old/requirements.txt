@@ -1,0 +1,5 @@
+opencv_python==4.11.0.86
+Pillow==11.3.0
+pyzbar==0.1.9
+qrcode==8.2
+# sudo apt-get install libzbar0
